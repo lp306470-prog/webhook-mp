@@ -59,17 +59,14 @@ app.post("/webhook", async (req, res) => {
     );
 
     if (response.data.status === "approved") {
-      pagamentos[payment.id] = "approved";
-    }
+      const token = crypto.randomBytes(16).toString("hex");
 
+      pagamentos[payment.id] = {
+        status: "approved",
+        token: token
+      };
+    }
   } catch (err) {}
 
   res.sendStatus(200);
 });
-
-app.get("/status/:id", (req, res) => {
-  const status = pagamentos[req.params.id] || "pending";
-  res.json({ status });
-});
-
-app.listen(3000, () => console.log("Servidor rodando"));
