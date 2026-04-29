@@ -2,12 +2,14 @@ const express = require("express");
 const axios = require("axios");
 const cors = require("cors");
 const crypto = require("crypto");
+
 const app = express();
 app.use(express.json());
 app.use(cors());
 
 const pagamentos = {};
 
+// CRIAR PAGAMENTO
 app.post("/criar-pagamento", async (req, res) => {
   const { titulo, preco } = req.body;
 
@@ -43,6 +45,7 @@ app.post("/criar-pagamento", async (req, res) => {
   }
 });
 
+// WEBHOOK
 app.post("/webhook", async (req, res) => {
   const payment = req.body.data;
 
@@ -66,7 +69,24 @@ app.post("/webhook", async (req, res) => {
         token: token
       };
     }
+
   } catch (err) {}
 
   res.sendStatus(200);
 });
+
+// LIBERAÇÃO
+app.get("/liberar/:id", (req, res) => {
+  const pagamento = pagamentos[req.params.id];
+
+  if (pagamento && pagamento.status === "approved") {
+    res.json({
+      liberado: true,
+      token: pagamento.token
+    });
+  } else {
+    res.json({ liberado: false });
+  }
+});
+
+app.listen(3000, () => console.log("Servidor rodando"));
